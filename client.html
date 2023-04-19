@@ -14,6 +14,8 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js";
+                        import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-storage.js";
+
 
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
@@ -32,14 +34,26 @@
         const app = initializeApp(firebaseConfig);
 
         const db = getFirestore();
+        const storage = getStorage();
 
         // Get data from Firestore
         const querySnapshot = await getDocs(collection(db, "companies"));
-        querySnapshot.forEach((doc) => {
+                        querySnapshot.forEach(async (doc) => {
             const data = doc.data();
             console.log(data);
+
+                        // Get the download URL of the image
+                        const imageRef = ref(storage, data.imageUrl);
+                        const imageUrl = await getDownloadURL(imageRef);
+
+            // Create a list item with the company data and the image
             const li = document.createElement("li");
-            li.textContent = JSON.stringify(data);
+                        li.innerHTML = `
+                <h2>${data.name}</h2>
+                <img src="${imageUrl}" alt="${data.name}">
+                <p>${data.desc}</p>
+            `;
+
             document.getElementById("dataList").appendChild(li);
         });
 
